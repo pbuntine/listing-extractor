@@ -69,3 +69,20 @@ test('site adapter is matched by host and parent domains', () => {
   assert.strictEqual(LE.findAdapter('https://notidealista.com/'), null);
   assert.strictEqual(LE.runAdapter(adapter, doc).items.length, 2);
 });
+
+test('linkedin adapter keeps only the outer card when componentkey is repeated inside it', () => {
+  const job = (id, company) => `
+    <div class="w" data-display-contents="true"><div class="s">
+      <div role="button" componentkey="job-card-component-ref-${id}">
+        <div componentkey="job-card-component-ref-${id}"><p>Job ${id}</p><p>${company}</p></div>
+      </div>
+    </div></div>`;
+  const { doc, LE } = load(`<body><div id="list">${job(1, 'Acme')}${job(2, 'Tails.com | B Corp')}${job(3, 'Initech')}</div></body>`);
+  const adapter = LE.findAdapter('https://www.linkedin.com/jobs/search-results/?keywords=x');
+  assert.strictEqual(adapter.id, 'linkedin-jobs');
+  const c = LE.runAdapter(adapter, doc);
+  assert.strictEqual(c.items.length, 3);
+  assert.ok(c.items.every((el) => el.getAttribute('role') === 'button'));
+  assert.ok(c.items[1].textContent.includes('Tails.com'));
+  assert.strictEqual(c.container.id, 'list');
+});

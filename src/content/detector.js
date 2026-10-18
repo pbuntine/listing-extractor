@@ -49,6 +49,8 @@
     if (!win) return true;
     const style = win.getComputedStyle(el);
     if (style.display === 'none' || style.visibility === 'hidden') return false;
+    // display:contents wrappers have no boxes of their own (LinkedIn wraps every card in one).
+    if (style.display === 'contents') return Array.from(el.children).some(isRendered);
     return el.getClientRects().length > 0;
   }
 
