@@ -1,0 +1,13 @@
+{
+  "name": "listing-extractor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome extension that detects listings on a page and saves them as an HTML snippet.",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Listing Extractor",
+  "version": "0.1.0",
+  "description": "Detects the listings on the current page and saves them as an HTML snippet.",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_title": "Extract listings",
+    "default_popup": "popup/popup.html"
+  }
+}
