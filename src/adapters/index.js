@@ -16,6 +16,8 @@
   const ADAPTERS = [
     // Starting point only: verify against the live site and adjust.
     { id: 'idealista', hosts: ['idealista.com', 'idealista.pt', 'idealista.it'], itemSelector: 'article.item' },
+    // Class names are hashed; componentkey is stable. It is repeated on a nested div, which runAdapter drops.
+    { id: 'linkedin-jobs', hosts: ['linkedin.com'], itemSelector: '[componentkey^="job-card-component-ref-"]' },
   ];
 
   function hostMatches(hostname, host) {
@@ -32,13 +34,21 @@
     return ADAPTERS.find((a) => a.hosts.some((h) => hostMatches(hostname, h))) || null;
   }
 
+  function commonAncestor(items) {
+    let node = items[0].parentElement;
+    while (node && !items.every((el) => node.contains(el))) node = node.parentElement;
+    return node || items[0].parentElement;
+  }
+
   /** @returns candidate in the same shape as findCandidates, or null */
   function runAdapter(adapter, doc) {
-    const items = Array.from(doc.querySelectorAll(adapter.itemSelector));
+    const matches = Array.from(doc.querySelectorAll(adapter.itemSelector));
+    // Keep only outermost matches so a selector that also hits a card's inner element doesn't double-count.
+    const items = matches.filter((el) => !matches.some((other) => other !== el && other.contains(el)));
     if (!items.length) return null;
     const container = adapter.containerSelector
-      ? doc.querySelector(adapter.containerSelector) || items[0].parentElement
-      : items[0].parentElement;
+      ? doc.querySelector(adapter.containerSelector) || commonAncestor(items)
+      : commonAncestor(items);
     return {
       container,
       items,
